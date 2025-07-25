@@ -1,12 +1,20 @@
-🚀 Hands-Free Instagram Reels Scrolling? Why Not! 😎
+🤖 Hand Gesture Controlled Instagram Reels Scroller
+This project allows you to scroll through Instagram Reels using just your hand gestures — no mouse, no keyboard, just your webcam and some cool computer vision magic!
 
-Ever felt too lazy to scroll through reels while chilling back? Well, I did—so I built a hand gesture-controlled reel scroller! ✨
+🔧 Technologies Used
+MediaPipe – for real-time hand tracking
 
-Using MediaPipe + OpenCV, I created a fun personal project that lets me scroll reels with just my hand gestures—no need to touch the screen! 🤯
+OpenCV – for video capture and processing
 
-This wasn’t just for fun (okay, maybe a little 😆), but also a cool way to explore computer vision and hand tracking while solving a daily-life “problem” in the laziest way possible.
+PyAutoGUI – for automating keyboard scroll events
 
-🔧 Tech Stack: Python | OpenCV | MediaPipe | PyAutoGUI
-🎯 Use Case: Sit back, relax, and let your hand do the scrolling!
+🎯 How It Works
+Open your Instagram Reels on a browser.
 
-Now, I just need to build a bot that likes and comments for me... any ideas? 🤔😆
+Launch this script and position your hand in view of the webcam.
+
+Swipe left or right with your hand to scroll through the reels — just like magic!
+
+💡 Use Case
+A fun and experimental project that blends gesture recognition and automation, offering a glimpse into touchless interaction for social media.
+
