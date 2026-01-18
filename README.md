@@ -76,7 +76,7 @@ It provides a glimpse into future applications such as:
 **Naitik Gupta**  
 Backend | AI | Blockchain | Cybersecurity  
 
-📷 Instagram: https://instagram.com/geeksecurity_  
+📷 Instagram: https://instagram.com/geeksecurity_/
 💻 GitHub: https://github.com/naitik120gupta
 
 ---
