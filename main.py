@@ -107,30 +107,32 @@ def main():
     print("Move your hand up/down to scroll")
     print("Press 'q' to quit")
     
-    while cap.isOpened():
-        success, frame = cap.read()
-        if not success:
-            print("Failed to capture video")
-            break
-        
-        
-        frame = cv2.flip(frame, 1)
-        
-        
-        frame, gesture = controller.detect_gestures(frame)
-        
-        
-        controller.execute_action(gesture)
-        
-        
-        cv2.imshow('Hand Gesture Controller', frame)
-        
-        
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-    
-    cap.release()
-    cv2.destroyAllWindows()
+    try:
+        while cap.isOpened():
+            success, frame = cap.read()
+            if not success:
+                print("Failed to capture video")
+                break
+
+
+            frame = cv2.flip(frame, 1)
+
+
+            frame, gesture = controller.detect_gestures(frame)
+
+
+            controller.execute_action(gesture)
+
+
+            cv2.imshow('Hand Gesture Controller', frame)
+
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+    finally:
+        cap.release()
+        cv2.destroyAllWindows()
+        controller.hands.close()
 
 if __name__ == "__main__":
     main()
