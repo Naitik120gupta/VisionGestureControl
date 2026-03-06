@@ -3,11 +3,12 @@ from unittest.mock import MagicMock, patch
 import sys
 
 # Mock OpenCV and MediaPipe
-sys.modules['cv2'] = MagicMock()
-sys.modules['mediapipe'] = MagicMock()
-sys.modules['pyautogui'] = MagicMock()
+sys.modules["cv2"] = MagicMock()
+sys.modules["mediapipe"] = MagicMock()
+sys.modules["pyautogui"] = MagicMock()
 
 from main import GestureController
+
 
 class TestGestureController(unittest.TestCase):
     def setUp(self):
@@ -36,11 +37,39 @@ class TestGestureController(unittest.TestCase):
         # (y_sum * frame_height) / 6 = (9.0 * 200) / 6 = 1800 / 6 = 300.0
 
         expected_center = [75.0, 300.0]
-        actual_center = self.controller.calculate_palm_center(mock_hand_landmarks, frame_width, frame_height)
+        actual_center = self.controller.calculate_palm_center(
+            mock_hand_landmarks, frame_width, frame_height
+        )
 
         # Allow for small floating point inaccuracies
         self.assertAlmostEqual(actual_center[0], expected_center[0])
         self.assertAlmostEqual(actual_center[1], expected_center[1])
 
-if __name__ == '__main__':
+    @patch("main.cv2")
+    def test_main_invalid_frame_handled(self, mock_cv2):
+        from main import main
+
+        # Mock the VideoCapture to return an invalid frame then stop
+        mock_cap = MagicMock()
+        mock_cv2.VideoCapture.return_value = mock_cap
+
+        # isOpened will return True once, then False
+        mock_cap.isOpened.side_effect = [True, False]
+
+        # mock frame as an object with empty shape
+        mock_frame = MagicMock()
+        mock_frame.shape = (0, 0, 3)
+        mock_cap.read.return_value = (True, mock_frame)
+
+        # This shouldn't raise any exceptions
+        try:
+            main()
+        except Exception as e:
+            self.fail(f"main() raised {type(e).__name__} unexpectedly!")
+
+        # Verify that cv2.flip wasn't called because we hit `continue`
+        mock_cv2.flip.assert_not_called()
+
+
+if __name__ == "__main__":
     unittest.main()
