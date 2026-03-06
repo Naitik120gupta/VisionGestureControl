@@ -88,16 +88,14 @@ class GestureController:
 
     def calculate_palm_center(self, hand_landmarks, frame_width, frame_height):
         """Calculate the center of the palm based on hand landmarks."""
-
-        palm_points = [0, 1, 5, 9, 13, 17]
-        x_sum = y_sum = 0
-
-        for point in palm_points:
-            x_sum += hand_landmarks.landmark[point].x * frame_width
-            y_sum += hand_landmarks.landmark[point].y * frame_height
-
-        return [x_sum / len(palm_points), y_sum / len(palm_points)]
-
+        
+        palm_points = [0, 1, 5, 9, 13, 17] 
+        
+        x_sum = sum(hand_landmarks.landmark[point].x for point in palm_points)
+        y_sum = sum(hand_landmarks.landmark[point].y for point in palm_points)
+        
+        return [(x_sum * frame_width) / len(palm_points), (y_sum * frame_height) / len(palm_points)]
+    
     def execute_action(self, gesture):
         """Execute the action corresponding to the detected gesture."""
         if gesture == "scroll_down":
