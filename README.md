@@ -35,6 +35,22 @@ This project demonstrates how **human–computer interaction (HCI)** can be enha
    - 👈 Swipe Left → Scroll to previous reel
 5. Enjoy hands-free scrolling ✨
 
+### Mobile / Android Mode
+
+You can also use the same gesture detection to control reels on an Android phone through `adb`:
+
+1. Enable Developer Options and USB Debugging on your phone.
+2. Connect the phone to your computer and confirm `adb devices` shows it.
+3. Start the app with `--target android`.
+
+Example:
+
+```bash
+python main.py --target android
+```
+
+In Android mode, a downward hand gesture triggers an upward swipe on the phone screen, which matches the way reels are advanced.
+
 ---
 
 ## 💡 Use Case
@@ -68,6 +84,7 @@ It provides a glimpse into future applications such as:
 - Multi-platform support
 - Custom gesture mapping
 - UI overlay for feedback
+- Bluetooth / wireless phone control
 
 ---
 
