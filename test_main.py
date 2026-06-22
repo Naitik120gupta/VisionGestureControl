@@ -63,12 +63,29 @@ class TestGestureController(unittest.TestCase):
 
         # This shouldn't raise any exceptions
         try:
-            main()
+            main([])
         except Exception as e:
             self.fail(f"main() raised {type(e).__name__} unexpectedly!")
 
         # Verify that cv2.flip wasn't called because we hit `continue`
         mock_cv2.flip.assert_not_called()
+
+    @patch("main.subprocess.run")
+    def test_android_swipe_command(self, mock_run):
+        controller = GestureController(target="android", adb_path="adb", swipe_duration_ms=300)
+
+        mock_run.side_effect = [
+            MagicMock(stdout="Physical size: 1080x2400\n"),
+            MagicMock(),
+        ]
+
+        controller._android_swipe("up")
+
+        self.assertEqual(mock_run.call_count, 2)
+        first_call_args = mock_run.call_args_list[1][0][0]
+        self.assertEqual(first_call_args[:4], ["adb", "shell", "input", "swipe"])
+        self.assertEqual(first_call_args[-1], "300")
+        self.assertEqual(first_call_args[4:8], ["540", "1800", "540", "600"])
 
 
 if __name__ == "__main__":

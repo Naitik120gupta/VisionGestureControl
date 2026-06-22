@@ -1,11 +1,13 @@
 import cv2
 import mediapipe as mp
 import pyautogui
+import subprocess
+import argparse
 import time
 
 
 class GestureController:
-    def __init__(self):
+    def __init__(self, target="desktop", adb_path="adb", swipe_duration_ms=250):
         self.mp_hands = mp.solutions.hands
         self.hands = self.mp_hands.Hands(
             static_image_mode=False,
@@ -21,6 +23,10 @@ class GestureController:
 
         # Gesture thresholds
         self.scroll_threshold = 0.05
+        self.target = target
+        self.adb_path = adb_path
+        self.swipe_duration_ms = swipe_duration_ms
+        self._screen_size = None
 
     def detect_gestures(self, frame):
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -102,22 +108,100 @@ class GestureController:
     def execute_action(self, gesture):
         """Execute the action corresponding to the detected gesture."""
         if gesture == "scroll_down":
-            pyautogui.scroll(-100)
-            print("Scrolling down")
+            self._perform_scroll("down")
         elif gesture == "scroll_up":
-            pyautogui.scroll(100)
-            print("Scrolling up")
+            self._perform_scroll("up")
+
+    def _perform_scroll(self, direction):
+        if self.target == "android":
+            self._android_swipe(direction)
+            print(f"Swiping {direction} on Android")
+        else:
+            if direction == "down":
+                pyautogui.scroll(-100)
+            else:
+                pyautogui.scroll(100)
+            print(f"Scrolling {direction}")
+
+    def _get_android_screen_size(self):
+        if self._screen_size is not None:
+            return self._screen_size
+
+        result = subprocess.run(
+            [self.adb_path, "shell", "wm", "size"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        for line in result.stdout.splitlines():
+            if "Physical size:" in line:
+                size_text = line.split(":", 1)[1].strip()
+                width_text, height_text = size_text.split("x", 1)
+                self._screen_size = (int(width_text), int(height_text))
+                return self._screen_size
+
+        raise RuntimeError("Unable to determine Android screen size from adb")
+
+    def _android_swipe(self, direction):
+        screen_width, screen_height = self._get_android_screen_size()
+        x = screen_width // 2
+        start_y = int(screen_height * 0.75)
+        end_y = int(screen_height * 0.25)
+
+        if direction == "down":
+            start_y, end_y = end_y, start_y
+
+        subprocess.run(
+            [
+                self.adb_path,
+                "shell",
+                "input",
+                "swipe",
+                str(x),
+                str(start_y),
+                str(x),
+                str(end_y),
+                str(self.swipe_duration_ms),
+            ],
+            check=True,
+        )
 
 
-def main():
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="Hand gesture scroll controller")
+    parser.add_argument(
+        "--target",
+        choices=["desktop", "android"],
+        default="desktop",
+        help="Where the gesture should scroll",
+    )
+    parser.add_argument(
+        "--adb-path",
+        default="adb",
+        help="ADB executable path when target is android",
+    )
+    parser.add_argument(
+        "--swipe-duration-ms",
+        type=int,
+        default=250,
+        help="Swipe duration in milliseconds for Android scrolling",
+    )
+    args = parser.parse_args(argv)
 
-    controller = GestureController()
+    controller = GestureController(
+        target=args.target,
+        adb_path=args.adb_path,
+        swipe_duration_ms=args.swipe_duration_ms,
+    )
 
     cap = cv2.VideoCapture(0)
 
     print("=== Hand Gesture Social Media Controller ===")
     print("Hold your hand in front of the camera")
     print("Move your hand up/down to scroll")
+    if args.target == "android":
+        print("Android mode enabled: requires USB debugging and adb")
     print("Press 'q' to quit")
 
     while cap.isOpened():
