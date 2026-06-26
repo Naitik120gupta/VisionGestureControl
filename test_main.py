@@ -70,6 +70,16 @@ class TestGestureController(unittest.TestCase):
         # Verify that cv2.flip wasn't called because we hit `continue`
         mock_cv2.flip.assert_not_called()
 
+    @patch("main.pyautogui.scroll")
+    def test_perform_scroll_desktop(self, mock_scroll):
+        self.controller.target = "desktop"
+
+        self.controller._perform_scroll("down")
+        mock_scroll.assert_called_with(-100)
+
+        self.controller._perform_scroll("up")
+        mock_scroll.assert_called_with(100)
+
     @patch("main.subprocess.run")
     def test_android_swipe_command(self, mock_run):
         controller = GestureController(target="android", adb_path="adb", swipe_duration_ms=300)
