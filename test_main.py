@@ -97,6 +97,16 @@ class TestGestureController(unittest.TestCase):
         self.assertEqual(first_call_args[-1], "300")
         self.assertEqual(first_call_args[4:8], ["540", "1800", "540", "600"])
 
+    @patch("main.subprocess.run")
+    def test_get_android_screen_size_runtime_error(self, mock_run):
+        controller = GestureController(target="android")
+        mock_run.return_value = MagicMock(stdout="Some other output\nNo size info here\n")
+
+        with self.assertRaises(RuntimeError) as context:
+            controller._get_android_screen_size()
+
+        self.assertEqual(str(context.exception), "Unable to determine Android screen size from adb")
+
 
 if __name__ == "__main__":
     unittest.main()
